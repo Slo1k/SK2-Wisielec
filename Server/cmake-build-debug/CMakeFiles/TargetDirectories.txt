@@ -1,0 +1,3 @@
+/home/student/Pulpit/Projekt/cmake-build-debug/CMakeFiles/Projekt.dir
+/home/student/Pulpit/Projekt/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/student/Pulpit/Projekt/cmake-build-debug/CMakeFiles/rebuild_cache.dir
