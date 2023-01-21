@@ -11,6 +11,7 @@
 #include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <csignal>
+#include <sstream>
 
 #define MAX_CLIENTS 3
 #define MAX_ROOMS 2
@@ -36,7 +37,8 @@ struct room_t {
     char room_hangman[BUFFER_SIZE];
     client_t* clients[MAX_CLIENTS];
     int num_clients;
-    int current_player;
+    int place = 0;
+    int lost = 0;
 };
 
 int listen_fd {};
@@ -58,7 +60,7 @@ void sig_handler(int signal){
 
 //Wyslanie wiadomosci do klienta
 void send_to_client(const char* msg, client_t client) {
-    printf("SENDING: %s", msg);
+    printf("%d|SENDING: %s", client.sockfd, msg);
     int n = write(client.sockfd, msg, strlen(msg));
     if (n < 0) {
         error("ERROR writing to socket");
@@ -132,7 +134,7 @@ void handle_client(client_t &client) {
         char* token = strtok(buffer, " ");
 
         //Ustawienie nicku gracza
-        if (strcmp(token, "NICK") == 0) {
+        if (strcmp(token, "SETNICK") == 0) {
             token = strtok(NULL, " ");
             if (token != NULL) {
                 int taken = 0;
@@ -180,6 +182,12 @@ void handle_client(client_t &client) {
                         client.room = room;
                         sprintf(buffer, "JOINED|%s\n", client.nickname);
                         broadcast(buffer, room);
+						std::string current_players = "CURRENTPLAYERS|";
+						for (int i=0; i< room->num_clients; i++){
+							current_players += room->clients[i]->nickname + std::string("|");
+						}
+						current_players += "\n";
+						send_to_client(current_players.c_str(), client);
                     } else {
                         send_to_client("ROOMFULL\n", client);
                     }
@@ -263,24 +271,30 @@ void handle_client(client_t &client) {
                         client.player_hangman[k] = letter;
                     }
                 }
+                if (client.errors < MAX_INCORRECT_GUESSES){
+                    send_to_client(client.player_hangman, client);
+                }
                 if (found) {
                     if (strcmp(client.player_hangman, room->room_hangman) == 0) {
-                        sprintf(buffer, "WON|%s\n", client.nickname);
-                        send_to_client(buffer, client);
+						room->place++;
+                        sprintf(buffer, "WON|%d|%s\n", room->place,client.nickname);
+                        broadcast(buffer, room);
                         reset_stats(&client);
                         remove_client_from_room(&client, room);
                     }
                 } else {
                     client.errors++;
-                    if (client.errors == MAX_INCORRECT_GUESSES) {
-                        sprintf(buffer, "LOST|%s\n", client.nickname);
-                        send_to_client(buffer, client);
+                    if (client.errors == MAX_INCORRECT_GUESSES) 
+                        sprintf(buffer, "LOST|%d|%s\n", MAX_CLIENTS-room->lost,client.nickname);
+                        room->lost++;
+                        broadcast(buffer, room);
                         reset_stats(&client);
                         remove_client_from_room(&client, room);
                     }
                 }
                 if (room->num_clients == 1){
-                    sprintf(buffer, "LOST|%s\n", client.nickname);
+                    sprintf(buffer, "LOST|%d|%s\n", MAX_CLIENTS-room->lost,room->clients[0]->nickname);
+                    room->lost++;
                     send_to_client(buffer, *(room->clients[0]));
                     reset_stats(&client);
                     remove_client_from_room(room->clients[0], room);
@@ -288,9 +302,6 @@ void handle_client(client_t &client) {
                 }
                 sprintf(buffer, "GUESS|%s|%d|%d\n", client.nickname, client.points, client.errors);
                 broadcast(buffer, room);
-                if (client.errors < MAX_INCORRECT_GUESSES){
-                    send_to_client(client.player_hangman, client);
-                }
             }
             //Opuszczenie pokoju
         } else if (strcmp(token, "LEAVE") == 0) {
@@ -299,6 +310,8 @@ void handle_client(client_t &client) {
             if (room != NULL){
                 reset_stats(&client);
                 remove_client_from_room(&client, client.room);
+                sprintf(buffer, "LEFT|%s\n", client.nickname);
+                broadcast(buffer, room);
                 left = true;
                 if (room->num_clients == 0){
                     remove_room(room);
