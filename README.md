@@ -19,6 +19,9 @@ Domyślnie serwer oraz klient działają na localhost na porcie 54321
 - LEAVE                             - Pozwala na opuszczenie pokoju, w przypadku bycia poza pokojem serwer wysyła wiadomość (OUTSIDEROOM)
 
 
+Hasło do wisielca to: KUKULKA
+
+
 ### Autorzy:
 Mikołaj Krakowiak 148076
 Adam Kopiec 148198
