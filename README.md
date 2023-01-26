@@ -1,13 +1,13 @@
 # SK2-Wisielec
 
 ### Sposób kompilacji
-Dla serwera: Należy uruchomić plik makefile
+- Dla serwera: Należy uruchomić plik makefile
 
-###Sposób uruchomienia
-Dla serwera: ./server <PORT>
-Dla klienta python3 client <ADRES> <PORT>
+### Sposób uruchomienia
+- Dla serwera: ./server <PORT>
+- Dla klienta python3 client <ADRES> <PORT>
 
-Hasło do wisielca to: KUKULKA
+#### Hasło do wisielca to: KUKULKA
 
 ### Autorzy:
 Mikołaj Krakowiak 148076
