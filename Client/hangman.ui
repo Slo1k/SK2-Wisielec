@@ -1,0 +1,823 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QWidget" name="widget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>-1</x>
+     <y>-1</y>
+     <width>1001</width>
+     <height>801</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <widget class="QLabel" name="hangmanLabelMyHangman">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>0</y>
+      <width>300</width>
+      <height>300</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPassword">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>320</y>
+      <width>300</width>
+      <height>60</height>
+     </rect>
+    </property>
+	<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>20</pointsize>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>_ _ _ _ _ _</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelMyScore">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>0</y>
+      <width>141</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Twój Wynik:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonA">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>400</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>A</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonB">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>400</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>B</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonC">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>400</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>C</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonD">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>400</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>D</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonE">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>400</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>E</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonF">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>400</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>F</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonG">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>470</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>G</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonJ">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>470</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>J</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonL">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>470</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>L</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonI">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>470</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>I</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonK">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>470</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>K</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonH">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>470</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>H</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonO">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>540</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>O</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonQ">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>540</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Q</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonN">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>540</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>N</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonP">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>540</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>P</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonR">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>540</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>R</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonM">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>540</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>M</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonU">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>610</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>U</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonW">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>610</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>W</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonT">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>610</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>T</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonV">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>610</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>V</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonX">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>610</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>X</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonS">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>610</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>S</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonY">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>680</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Y</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonZ">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>680</y>
+      <width>50</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Z</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer2">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>0</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gracz2: 0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer2Hang">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>20</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer4">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>200</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gracz4: 0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer4Hang">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>220</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer6Hang">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>420</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer6">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>400</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gracz6: 0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer8Hang">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>620</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer8">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>600</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gracz8: 0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer1Hang">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>20</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer1">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>0</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gracz1: 0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer3Hang">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>220</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer3">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>200</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gracz3: 0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer5Hang">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>420</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer5">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>400</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gracz5: 0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer7Hang">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>620</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/hangman0.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelPlayer7">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>600</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gracz7: 0</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonLeave">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>750</y>
+      <width>130</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Opuść rozgrywkę</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonStart">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>700</y>
+      <width>130</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+	<property name="visible">
+		<bool>false</bool>
+	</property>
+   </widget>
+   <widget class="QPushButton" name="hangmanButtonAccept">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>700</y>
+      <width>130</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Potwierdź Gotowość</string>
+    </property>
+	<property name="visible">
+		<bool>false</bool>
+	</property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
