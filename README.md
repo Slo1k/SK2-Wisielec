@@ -1,5 +1,8 @@
 # SK2-Wisielec
 
+### Wymagania
+PyQt w wersji 5.
+
 ### Sposób kompilacji
 - Dla serwera: Należy uruchomić plik makefile
 
