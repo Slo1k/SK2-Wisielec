@@ -9,6 +9,7 @@ current_players = {}
 players_count = 0
 my_nick = None
 in_room = False
+in_game = False
 hangman_password = ""
 hidden_hangman_password = []
 sent_letter = ""
@@ -147,7 +148,7 @@ class HangmanScreen(QDialog):
         self.letterButtons.buttonClicked.connect(self.guess_letter)
         self.hangmanButtonStart.clicked.connect(self.start_game)
         self.hangmanButtonAccept.clicked.connect(self.accept_game)
-        self.hangmanButtonLeave.clicked.connect(self.leave)
+
 
     def update_screen(self, message):
         global hangman_password
@@ -196,23 +197,28 @@ class HangmanScreen(QDialog):
             msg.exec_()
         elif message.startswith("LEFT"):
             player = message.split("|")[1]
-            player_ind, _, _ = current_players[player]
-            if player_ind == 1:
-                self.hangmanLabelPlayer1Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-            elif player_ind == 2:
-                self.hangmanLabelPlayer2Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-            elif player_ind == 3:
-                self.hangmanLabelPlayer3Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-            elif player_ind == 4:
-                self.hangmanLabelPlayer4Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-            elif player_ind == 5:
-                self.hangmanLabelPlayer5Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-            elif player_ind == 6:
-                self.hangmanLabelPlayer6Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-            elif player_ind == 7:
-                self.hangmanLabelPlayer7Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-            elif player_ind == 8:
-                self.hangmanLabelPlayer8Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+            try:
+                player_ind, _, _ = current_players[player]
+                if in_game:
+                    if player_ind == 1:
+                        self.hangmanLabelPlayer1Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                    elif player_ind == 2:
+                        self.hangmanLabelPlayer2Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                    elif player_ind == 3:
+                        self.hangmanLabelPlayer3Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                    elif player_ind == 4:
+                        self.hangmanLabelPlayer4Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                    elif player_ind == 5:
+                        self.hangmanLabelPlayer5Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                    elif player_ind == 6:
+                        self.hangmanLabelPlayer6Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                    elif player_ind == 7:
+                        self.hangmanLabelPlayer7Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                    elif player_ind == 8:
+                        self.hangmanLabelPlayer8Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+            except:
+                pass
+
         elif message.startswith("GUESS"):
             _, who, points, errors = message.split("|")
             points = int(points)
@@ -258,7 +264,6 @@ class HangmanScreen(QDialog):
         elif message.startswith("START"):
             self.display_accept()
         elif message.startswith("HANGMANSTART"):
-            self.hangmanButtonLeave.setDisabled(False)
             hangman_length = int(len(message.split("|")[1]))
             hangman_password = message.split("|")[1]
             hidden_hangman_password = ["_" for _ in range(hangman_length)]
@@ -296,6 +301,7 @@ class HangmanScreen(QDialog):
                     self.hangmanLabelPlayer7Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
                 elif player_ind == 8:
                     self.hangmanLabelPlayer8Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                del current_players[who]
         self.is_king()
         self.repaint()
 
@@ -339,7 +345,6 @@ class HangmanScreen(QDialog):
         if self.hangmanButtonStart.isVisible():
             self.hangmanButtonStart.setVisible(False)
         self.hangmanButtonAccept.setVisible(True)
-        self.hangmanButtonLeave.setDisabled(True)
 
     def display_hangman_hidden(self):
         self.hangmanLabelPassword.setText(" ".join(hidden_hangman_password))
@@ -358,7 +363,9 @@ class HangmanScreen(QDialog):
 
     def leave(self):
         global in_room
+        global players_count
         current_players.clear()
+        players_count = 0
         in_room = False
         send_message("LEAVE")
         self.server_thread.terminate()
