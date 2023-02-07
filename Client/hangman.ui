@@ -44,6 +44,27 @@
      <bool>true</bool>
     </property>
    </widget>
+      <widget class="QLabel" name="hangmanLabelMyResult">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>0</y>
+      <width>300</width>
+      <height>300</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>35</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
+    </property>
+   </widget>
    <widget class="QLabel" name="hangmanLabelPassword">
     <property name="geometry">
      <rect>
@@ -470,6 +491,27 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="hangmanLabelResult2">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>20</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
+    </property>
+   </widget>
    <widget class="QLabel" name="hangmanLabelPlayer4">
     <property name="geometry">
      <rect>
@@ -513,6 +555,27 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="hangmanLabelResult4">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>220</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
+    </property>
+   </widget>
    <widget class="QLabel" name="hangmanLabelPlayer6Hang">
     <property name="geometry">
      <rect>
@@ -533,6 +596,27 @@
     </property>
     <property name="scaledContents">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelResult6">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>420</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
     </property>
    </widget>
    <widget class="QLabel" name="hangmanLabelPlayer6">
@@ -578,6 +662,27 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="hangmanLabelResult8">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>620</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
+    </property>
+   </widget>
    <widget class="QLabel" name="hangmanLabelPlayer8">
     <property name="geometry">
      <rect>
@@ -619,6 +724,27 @@
     </property>
     <property name="scaledContents">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelResult1">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>20</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
     </property>
    </widget>
    <widget class="QLabel" name="hangmanLabelPlayer1">
@@ -664,6 +790,27 @@
      <bool>true</bool>
     </property>
    </widget>
+      <widget class="QLabel" name="hangmanLabelResult3">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>220</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
+    </property>
+   </widget>
    <widget class="QLabel" name="hangmanLabelPlayer3">
     <property name="geometry">
      <rect>
@@ -707,6 +854,27 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="hangmanLabelResult5">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>420</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
+    </property>
+   </widget>
    <widget class="QLabel" name="hangmanLabelPlayer5">
     <property name="geometry">
      <rect>
@@ -748,6 +916,27 @@
     </property>
     <property name="scaledContents">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hangmanLabelResult7">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>620</y>
+      <width>160</width>
+      <height>160</height>
+     </rect>
+    </property>
+		<property name="visible">
+		<bool>false</bool>
+	</property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>WON/LOST</string>
     </property>
    </widget>
    <widget class="QLabel" name="hangmanLabelPlayer7">

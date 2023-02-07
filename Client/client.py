@@ -9,6 +9,7 @@ current_players = {}
 players_count = 0
 my_nick = None
 in_room = False
+is_king = False
 in_game = False
 hangman_password = ""
 hidden_hangman_password = []
@@ -34,6 +35,7 @@ class ServerThread(QThread):
             message = client_socket.recv(1024).decode("utf-8").strip().split("\n")
             if len(message) >= 1:
                 for mess in message:
+                    print("FROM SERVER:", mess.strip())
                     self.new_message.emit(mess.strip())
 
 
@@ -46,23 +48,24 @@ class NickScreen(QDialog):
     def set_nick(self):
         global my_nick
         my_nick = self.nickTextEdit.toPlainText()
-        message = "SETNICK " + my_nick
-        send_message(message)
-        try:
-            status = client_socket.recv(1024).decode("utf-8").strip()
-            if len(status) > 0:
-                if status == "NICKTAKEN":
-                    self.nickErrorLabel.setText(f"Nick: [{my_nick}] jest już zajęty!")
-                elif status == "NICKEMPTY":
-                    self.nickErrorLabel.setText(f"Nick nie może być pusty!")
-                else:
-                    rooms = RoomsScreen()
-                    widget.addWidget(rooms)
-                    widget.setCurrentIndex(widget.currentIndex() + 1)
-        except:
-            print("Błąd przy otrzymywaniu odpowiedzi od serwera")
-            client_socket.close()
-            sys.exit()
+        if not my_nick:
+            self.nickErrorLabel.setText(f"Nick nie może być pusty!")
+        else:
+            message = "SETNICK " + my_nick
+            send_message(message)
+            try:
+                status = client_socket.recv(1024).decode("utf-8").strip()
+                if len(status) > 0:
+                    if status == "NICKTAKEN":
+                        self.nickErrorLabel.setText(f"Nick: [{my_nick}] jest już zajęty!")
+                    else:
+                        rooms = RoomsScreen()
+                        widget.addWidget(rooms)
+                        widget.setCurrentIndex(widget.currentIndex() + 1)
+            except:
+                print("Błąd przy otrzymywaniu odpowiedzi od serwera")
+                client_socket.close()
+                sys.exit()
 
 
 class RoomsScreen(QDialog):
@@ -80,6 +83,7 @@ class RoomsScreen(QDialog):
             self.roomComboBox.addItem(room[5:])
 
     def join_room(self):
+        global is_king
         global in_room
         global players_count
         chosen_room = self.roomComboBox.currentText().split("|")[0]
@@ -89,17 +93,19 @@ class RoomsScreen(QDialog):
             if stat == "ROOMFULL":
                 msg = QMessageBox()
                 msg.setWindowTitle("Błąd!")
-                msg.setText("Pokój jest pełny lub gra już się rozpoczęła")
+                msg.setText("Pokój jest pełny lub gra już się rozpoczęła!")
                 msg.exec_()
                 self.update_combobox()
                 break
-            elif stat == "JOINED|" + my_nick:
+            if stat == "JOINED|" + my_nick:
                 in_room = True
                 current_players[my_nick] = [0, 0, 0]
-            elif stat.startswith("CURRENTPLAYERS"):
+            if stat.startswith("CURRENTPLAYERS"):
                 for player in stat.split("|")[1:-1]:
                     players_count += 1
                     current_players[player] = [players_count, 0, 0]
+            if stat.startswith("ISKING"):
+                is_king = True
         if in_room:
             hangman = HangmanScreen()
             widget.addWidget(hangman)
@@ -110,12 +116,12 @@ class HangmanScreen(QDialog):
     def __init__(self):
         super(HangmanScreen, self).__init__()
         loadUi("hangman.ui", self)
-        self.is_king()
         self.server_thread = ServerThread()
         self.server_thread.new_message.connect(self.update_screen)
         self.server_thread.start()
         self.letterButtons = QButtonGroup()
         self.letterButtons.setExclusive(True)
+        self.display_start()
         self.letterButtons.addButton(self.hangmanButtonA)
         self.letterButtons.addButton(self.hangmanButtonB)
         self.letterButtons.addButton(self.hangmanButtonC)
@@ -142,13 +148,45 @@ class HangmanScreen(QDialog):
         self.letterButtons.addButton(self.hangmanButtonX)
         self.letterButtons.addButton(self.hangmanButtonY)
         self.letterButtons.addButton(self.hangmanButtonZ)
+        self.hangmanPictures = [
+            self.hangmanLabelMyHangman,
+            self.hangmanLabelPlayer1Hang,
+            self.hangmanLabelPlayer2Hang,
+            self.hangmanLabelPlayer3Hang,
+            self.hangmanLabelPlayer4Hang,
+            self.hangmanLabelPlayer5Hang,
+            self.hangmanLabelPlayer6Hang,
+            self.hangmanLabelPlayer7Hang,
+            self.hangmanLabelPlayer8Hang,
+        ]
+        self.hangmanScores = [
+            self.hangmanLabelMyScore,
+            self.hangmanLabelPlayer1,
+            self.hangmanLabelPlayer2,
+            self.hangmanLabelPlayer3,
+            self.hangmanLabelPlayer4,
+            self.hangmanLabelPlayer5,
+            self.hangmanLabelPlayer6,
+            self.hangmanLabelPlayer7,
+            self.hangmanLabelPlayer8,
+        ]
+        self.hangmanResults = [
+            self.hangmanLabelMyResult,
+            self.hangmanLabelResult1,
+            self.hangmanLabelResult2,
+            self.hangmanLabelResult3,
+            self.hangmanLabelResult4,
+            self.hangmanLabelResult5,
+            self.hangmanLabelResult6,
+            self.hangmanLabelResult7,
+            self.hangmanLabelResult8
+        ]
         self.disable_letter_buttons()
         self.setup_current_players()
 
         self.letterButtons.buttonClicked.connect(self.guess_letter)
         self.hangmanButtonStart.clicked.connect(self.start_game)
         self.hangmanButtonAccept.clicked.connect(self.accept_game)
-
 
     def update_screen(self, message):
         global hangman_password
@@ -158,67 +196,22 @@ class HangmanScreen(QDialog):
             players_count += 1
             player_nick = message.split("|")[1]
             current_players[player_nick] = [players_count, 0, 0]
-            if players_count == 1:
-                self.hangmanLabelPlayer1.setText(f"{player_nick}: 0")
-                self.hangmanLabelPlayer1.setVisible(True)
-                self.hangmanLabelPlayer1Hang.setVisible(True)
-            elif players_count == 2:
-                self.hangmanLabelPlayer2.setText(f"{player_nick}: 0")
-                self.hangmanLabelPlayer2.setVisible(True)
-                self.hangmanLabelPlayer2Hang.setVisible(True)
-            elif players_count == 3:
-                self.hangmanLabelPlayer3.setText(f"{player_nick}: 0")
-                self.hangmanLabelPlayer3.setVisible(True)
-                self.hangmanLabelPlayer3Hang.setVisible(True)
-            elif players_count == 4:
-                self.hangmanLabelPlayer4.setText(f"{player_nick}: 0")
-                self.hangmanLabelPlayer4.setVisible(True)
-                self.hangmanLabelPlayer4Hang.setVisible(True)
-            elif players_count == 5:
-                self.hangmanLabelPlayer5.setText(f"{player_nick}: 0")
-                self.hangmanLabelPlayer5.setVisible(True)
-                self.hangmanLabelPlayer5Hang.setVisible(True)
-            elif players_count == 6:
-                self.hangmanLabelPlayer6.setText(f"{player_nick}: 0")
-                self.hangmanLabelPlayer6.setVisible(True)
-                self.hangmanLabelPlayer6Hang.setVisible(True)
-            elif players_count == 7:
-                self.hangmanLabelPlayer7.setText(f"{player_nick}: 0")
-                self.hangmanLabelPlayer7.setVisible(True)
-                self.hangmanLabelPlayer7Hang.setVisible(True)
-            elif players_count == 8:
-                self.hangmanLabelPlayer8.setText(f"{player_nick}: 0")
-                self.hangmanLabelPlayer8.setVisible(True)
-                self.hangmanLabelPlayer8Hang.setVisible(True)
+            self.hangmanScores[players_count].setText(f"{player_nick}: 0")
+            self.hangmanScores[players_count].setVisible(True)
+            self.hangmanPictures[players_count].setVisible(True)
         elif message.startswith("ATLEAST2PLAYERS"):
             msg = QMessageBox()
             msg.setWindowTitle("Błąd!")
             msg.setText("Do rozpoczęcia rozgrywki potrzeba minimum 2 graczy!")
             msg.exec_()
         elif message.startswith("LEFT"):
+            print(current_players)
             player = message.split("|")[1]
-            try:
-                player_ind, _, _ = current_players[player]
-                if in_game:
-                    if player_ind == 1:
-                        self.hangmanLabelPlayer1Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                    elif player_ind == 2:
-                        self.hangmanLabelPlayer2Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                    elif player_ind == 3:
-                        self.hangmanLabelPlayer3Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                    elif player_ind == 4:
-                        self.hangmanLabelPlayer4Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                    elif player_ind == 5:
-                        self.hangmanLabelPlayer5Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                    elif player_ind == 6:
-                        self.hangmanLabelPlayer6Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                    elif player_ind == 7:
-                        self.hangmanLabelPlayer7Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                    elif player_ind == 8:
-                        self.hangmanLabelPlayer8Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-            except:
-                pass
-
+            player_ind, _, _ = current_players[player]
+            if in_game:
+                self.hangmanPictures[player_ind].setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+            else:
+                self.update_current_players(player)
         elif message.startswith("GUESS"):
             _, who, points, errors = message.split("|")
             points = int(points)
@@ -236,30 +229,8 @@ class HangmanScreen(QDialog):
                     self.hangmanLabelMyHangman.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
             else:
                 player_ind, player_points, player_errors = current_players[who]
-                if player_ind == 1:
-                    self.hangmanLabelPlayer1.setText(f"{who}: {points}")
-                    self.hangmanLabelPlayer1Hang.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
-                elif player_ind == 2:
-                    self.hangmanLabelPlayer2.setText(f"{who}: {points}")
-                    self.hangmanLabelPlayer2Hang.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
-                elif player_ind == 3:
-                    self.hangmanLabelPlayer3.setText(f"{who}: {points}")
-                    self.hangmanLabelPlayer3Hang.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
-                elif player_ind == 4:
-                     self.hangmanLabelPlayer4.setText(f"{who}: {points}")
-                     self.hangmanLabelPlayer4Hang.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
-                elif player_ind == 5:
-                    self.hangmanLabelPlayer5.setText(f"{who}: {points}")
-                    self.hangmanLabelPlayer5Hang.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
-                elif player_ind == 6:
-                    self.hangmanLabelPlayer6.setText(f"{who}: {points}")
-                    self.hangmanLabelPlayer6Hang.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
-                elif player_ind == 7:
-                    self.hangmanLabelPlayer7.setText(f"{who}: {points}")
-                    self.hangmanLabelPlayer7Hang.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
-                elif player_ind == 8:
-                    self.hangmanLabelPlayer8.setText(f"{who}: {points}")
-                    self.hangmanLabelPlayer8Hang.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
+                self.hangmanScores[player_ind].setText(f"{who}: {points}")
+                self.hangmanPictures[player_ind].setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
                 current_players[who] = [player_ind, points, errors]
         elif message.startswith("START"):
             self.display_accept()
@@ -272,12 +243,19 @@ class HangmanScreen(QDialog):
         elif message.startswith("LOST") or message.startswith("WON"):
             won_lost, place, who = message.split("|")
             if who == my_nick and won_lost == "LOST":
+                self.hangmanLabelMyHangman.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                self.hangmanResults[0].setText(f"Miejse {place}")
+                self.hangmanResults[0].setStyleSheet("color: red")
+                self.hangmanResults[0].setVisible(True)
                 msg = QMessageBox()
                 msg.setWindowTitle("Przegrałeś!")
                 msg.setText(f"Przegrałeś i zająłeś {place} miejsce!")
                 msg.exec_()
                 self.leave()
             elif who == my_nick and won_lost == "WON":
+                self.hangmanResults[0].setText(f"Miejse {place}")
+                self.hangmanResults[0].setStyleSheet("color: green")
+                self.hangmanResults[0].setVisible(True)
                 msg = QMessageBox()
                 msg.setWindowTitle("Wygraleś!")
                 msg.setText(f"Wygrałeś i zająłeś {place} miejsce!")
@@ -285,61 +263,41 @@ class HangmanScreen(QDialog):
                 self.leave()
             elif won_lost == "LOST":
                 player_ind, _, _ = current_players[who]
-                if player_ind == 1:
-                    self.hangmanLabelPlayer1Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                elif player_ind == 2:
-                    self.hangmanLabelPlayer2Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                elif player_ind == 3:
-                    self.hangmanLabelPlayer3Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                elif player_ind == 4:
-                     self.hangmanLabelPlayer4Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                elif player_ind == 5:
-                    self.hangmanLabelPlayer5Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                elif player_ind == 6:
-                    self.hangmanLabelPlayer6Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                elif player_ind == 7:
-                    self.hangmanLabelPlayer7Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
-                elif player_ind == 8:
-                    self.hangmanLabelPlayer8Hang.setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                self.hangmanPictures[player_ind].setPixmap(QtGui.QPixmap(f"images/hangman6.png"))
+                self.hangmanResults[player_ind].setText(f"Miejse {place}")
+                self.hangmanResults[player_ind].setStyleSheet("color: red")
+                self.hangmanResults[player_ind].setVisible(True)
                 del current_players[who]
-        self.is_king()
+            elif won_lost == "WON":
+                player_ind, _, _ = current_players[who]
+                self.hangmanResults[player_ind].setText(f"Miejse {place}")
+                self.hangmanResults[player_ind].setStyleSheet("color: green")
+                self.hangmanResults[player_ind].setVisible(True)
+                del current_players[who]
+        elif message.startswith("ISKING"):
+            self.hangmanButtonStart.setVisible(True)
+
+        self.display_start()
         self.repaint()
 
     def setup_current_players(self):
         for key, value in current_players.items():
-            if value[0] == 1:
-                self.hangmanLabelPlayer1.setText(f"{key}: 0")
-                self.hangmanLabelPlayer1.setVisible(True)
-                self.hangmanLabelPlayer1Hang.setVisible(True)
-            elif value[0] == 2:
-                self.hangmanLabelPlayer2.setText(f"{key}: 0")
-                self.hangmanLabelPlayer2.setVisible(True)
-                self.hangmanLabelPlayer2Hang.setVisible(True)
-            elif value[0] == 3:
-                self.hangmanLabelPlayer3.setText(f"{key}: 0")
-                self.hangmanLabelPlayer3.setVisible(True)
-                self.hangmanLabelPlayer3Hang.setVisible(True)
-            elif value[0] == 4:
-                self.hangmanLabelPlayer4.setText(f"{key}: 0")
-                self.hangmanLabelPlayer4.setVisible(True)
-                self.hangmanLabelPlayer4Hang.setVisible(True)
-            elif value[0] == 5:
-                self.hangmanLabelPlayer5.setText(f"{key}: 0")
-                self.hangmanLabelPlayer5.setVisible(True)
-                self.hangmanLabelPlayer5Hang.setVisible(True)
-            elif value[0] == 6:
-                self.hangmanLabelPlayer6.setText(f"{key}: 0")
-                self.hangmanLabelPlayer6.setVisible(True)
-                self.hangmanLabelPlayer6Hang.setVisible(True)
-            elif value[0] == 7:
-                self.hangmanLabelPlayer7.setText(f"{key}: 0")
-                self.hangmanLabelPlayer7.setVisible(True)
-                self.hangmanLabelPlayer7Hang.setVisible(True)
-            elif value[0] == 8:
-                self.hangmanLabelPlayer8.setText(f"{key}: 0")
-                self.hangmanLabelPlayer8.setVisible(True)
-                self.hangmanLabelPlayer8Hang.setVisible(True)
+            self.hangmanScores[value[0]].setText(f"{key}: 0")
+            self.hangmanScores[value[0]].setVisible(True)
+            self.hangmanPictures[value[0]].setVisible(True)
 
+    def update_current_players(self, player):
+        global players_count
+        player_ind, _, _ = current_players[player]
+        for key, value in current_players.items():
+            self.hangmanScores[value[0]].setVisible(False)
+            self.hangmanPictures[value[0]].setVisible(False)
+        del current_players[player]
+        players_count -= 1
+        for key, value in current_players.items():
+            if value[0] > player_ind:
+                current_players[key] = [value[0]-1, value[1], value[2]]
+        self.setup_current_players()
 
     def display_accept(self):
         if self.hangmanButtonStart.isVisible():
@@ -354,9 +312,10 @@ class HangmanScreen(QDialog):
         send_message("ACCEPT")
         self.hangmanButtonAccept.setDisabled(True)
 
-    def is_king(self):
-        if len(current_players) == 1:
+    def display_start(self):
+        if is_king:
             self.hangmanButtonStart.setVisible(True)
+
 
     def start_game(self):
         send_message("START")
@@ -405,4 +364,4 @@ if __name__ == "__main__":
     try:
         sys.exit(app.exec_())
     except:
-        send_message("LEAVE")
+        pass
