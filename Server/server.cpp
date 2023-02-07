@@ -15,7 +15,7 @@
 #define MAX_ROOMS 4
 #define MAX_EVENTS 10
 #define BUFFER_SIZE 512
-#define MAX_INCORRECT_GUESSES 7
+#define MAX_INCORRECT_GUESSES 6
 
 struct room_t;
 
@@ -23,8 +23,9 @@ struct client_t {
     int sockfd;
     char nickname[BUFFER_SIZE];
     char player_hangman[BUFFER_SIZE];
-    int points;
-    int errors;
+    int points = 0;
+    int errors = 0;
+    bool isking = false;
     bool ready = false;
     room_t* room = NULL;
 };
@@ -36,8 +37,8 @@ struct room_t {
     bool in_game = false;
     int clients_at_start = 0;
     int num_clients;
-    int place = 0;
-    int lost = 0;
+    int place;
+    int lost;
 };
 
 int listen_fd {};
@@ -69,6 +70,7 @@ void send_to_client(const char* msg, client_t client) {
 void reset_stats(client_t* client){
     client->points = 0;
     client->errors = 0;
+    client->isking = false;
     client->ready = false;
 }
 
@@ -98,6 +100,7 @@ void remove_client_from_room(client_t* client, room_t* room){
             room->clients[i] = room->clients[i+1];
         }
         room->num_clients--;
+        client->room = NULL;
     }
 }
 
@@ -117,7 +120,7 @@ void reset_room(room_t* room) {
     rooms[index]->in_game = false;
     rooms[index]->clients_at_start = 0;
     rooms[index]->num_clients = 0;
-    rooms[index]->place = 0;
+    rooms[index]->place = 1;
     rooms[index]->lost = 0;
 }
 
@@ -131,7 +134,6 @@ int handle_client(client_t &client) {
         buffer[n] = '\0';
         char *token = strtok(buffer, " ");
 
-        //Ustawienie nicku gracza
         if (strcmp(token, "SETNICK") == 0) {
             token = strtok(NULL, " ");
             if (token != NULL) {
@@ -148,10 +150,7 @@ int handle_client(client_t &client) {
                     strcpy(client.nickname, token);
                     send_to_client("NICKACCEPTED\n", client);
                 }
-            } else {
-                send_to_client("NICKEMPTY\n", client);
             }
-            //Dołączenie do pokoju
         } else if (strcmp(token, "JOIN") == 0) {
             token = strtok(NULL, " ");
             room_t *room;
@@ -161,7 +160,7 @@ int handle_client(client_t &client) {
                     break;
                 }
             }
-            if (room->num_clients < MAX_CLIENTS && !room->in_game) {
+            if (room->num_clients < MAX_CLIENTS && !(room->in_game)) {
                 std::string current_players = "CURRENTPLAYERS|";
                 for (int i = 0; i < room->num_clients; i++) {
                     current_players += room->clients[i]->nickname + std::string("|");
@@ -172,10 +171,13 @@ int handle_client(client_t &client) {
                 sprintf(buffer, "JOINED|%s\n", client.nickname);
                 broadcast(buffer, room);
                 send_to_client(current_players.c_str(), client);
+                if (room->num_clients == 1) {
+                    client.isking = true;
+                    send_to_client("ISKING\n", client);
+                }
             } else {
                 send_to_client("ROOMFULL\n", client);
             }
-            //Sprawdzenie jakie pokoje istnieja i ile jest w nich osob
         } else if (strcmp(token, "ROOMS") == 0) {
                 sprintf(buffer, "Rooms:\n");
                 for (int i = 0; i < num_rooms; i++) {
@@ -183,34 +185,18 @@ int handle_client(client_t &client) {
                             MAX_CLIENTS);
                 }
                 send_to_client(buffer, client);
-            //Rozpoczecie rozgrywki
         } else if (strcmp(token, "START") == 0) {
-            if (client.room == NULL) {
-                send_to_client("OUTSIDEROOM\n", client);
-            } else {
                 room_t *room = client.room;
                 if (room->num_clients < 2) {
                     send_to_client("ATLEAST2PLAYERS\n", client);
                 } else {
-                    room->in_game = true;
-                    room->clients_at_start = room->num_clients;
-                    int index = -1;
-                    for (int i = 0; i < room->num_clients; i++) {
-                        if (room->clients[i] == &client) {
-                            index = i;
-                            break;
-                        }
-                    }
-                    if (index == 0) {
+                    if (client.isking){
+                        room->in_game = true;
+                        room->clients_at_start = room->num_clients;
                         sprintf(buffer, "START\n");
                         broadcast(buffer, room);
-                    } else {
-                        send_to_client("NOKING\n", client);
                     }
                 }
-            }
-
-            //Zakceptuj start rozgrywki
         } else if (strcmp(token, "ACCEPT") == 0) {
             room_t *room = client.room;
             client.ready = true;
@@ -235,12 +221,11 @@ int handle_client(client_t &client) {
                     send_to_client(hangman_message.c_str(), *(room->clients[i]));
                 }
             }
-
-            //Zgadnij litere
         } else if (strcmp(token, "GUESS") == 0) {
             token = strtok(NULL, " ");
             char letter = token[0];
             bool found = false;
+            bool won_lost = false;
             room_t *room = client.room;
             int points_before = client.points;
             for (int k = 0; k < strlen(room->room_hangman); k++) {
@@ -252,11 +237,12 @@ int handle_client(client_t &client) {
             }
             if (found) {
                 if (strcmp(client.player_hangman, room->room_hangman) == 0) {
-                    room->place++;
                     sprintf(buffer, "WON|%d|%s\n", room->place, client.nickname);
                     broadcast(buffer, room);
                     reset_stats(&client);
                     remove_client_from_room(&client, room);
+                    room->place++;
+                    won_lost = true;
                 }
             } else {
                 client.errors++;
@@ -266,9 +252,9 @@ int handle_client(client_t &client) {
                     broadcast(buffer, room);
                     reset_stats(&client);
                     remove_client_from_room(&client, room);
+                    won_lost = true;
                 }
             }
-
             if (room->num_clients == 1) {
                 sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, room->clients[0]->nickname);
                 room->lost++;
@@ -277,39 +263,86 @@ int handle_client(client_t &client) {
                 remove_client_from_room(room->clients[0], room);
                 reset_room(room);
             }
-            sprintf(buffer, "GUESS|%s|%d|%d\n", client.nickname, client.points, client.errors);
-            broadcast(buffer, room);
-            //Opuszczenie pokoju
+            if (!won_lost){
+                sprintf(buffer, "GUESS|%s|%d|%d\n", client.nickname, client.points, client.errors);
+                broadcast(buffer, room);
+            }
         } else if (strcmp(token, "LEAVE") == 0) {
             room_t *room = client.room;
             if (room != NULL) {
-                reset_stats(&client);
-                remove_client_from_room(&client, client.room);
-                sprintf(buffer, "LEFT|%s\n", client.nickname);
-                broadcast(buffer, room);
-                if (room->num_clients == 0) {
-                    reset_room(room);
+                if (!(room->in_game)){
+                    bool was_king = false;
+                    if (client.isking){
+                        was_king = true;
+                    }
+                    sprintf(buffer, "LEFT|%s\n", client.nickname);
+                    broadcast(buffer, room);
+                    reset_stats(&client);
+                    remove_client_from_room(&client, client.room);
+                    if (room->num_clients == 0) {
+                        reset_room(room);
+                    } else {
+                        if (was_king){
+                            send_to_client("ISKING", *(room->clients[0]));
+                        }
+                    }
+                } else {
+                    sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, client.nickname);
+                    room->lost++;
+                    broadcast(buffer, room);
+                    reset_stats(&client);
+                    remove_client_from_room(&client, room);
+                    if (room->num_clients == 1) {
+                        sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, room->clients[0]->nickname);
+                        room->lost++;
+                        send_to_client(buffer, *(room->clients[0]));
+                        reset_stats(&client);
+                        remove_client_from_room(room->clients[0], room);
+                        reset_room(room);
+                    }
                 }
             }
         } else {
             send_to_client("INVALIDCOMMAND\n", client);
         }
     } else {
-        if (client.room != NULL){
-            sprintf(buffer, "LEFT|%s\n", client.nickname);
-            broadcast(buffer, client.room);
-            sprintf(buffer, "LOST|%d|%s\n", client.room->clients_at_start - client.room->lost, client.nickname);
-            client.room->lost++;
-            broadcast(buffer, client.room);
-            reset_stats(&client);
-            remove_client_from_room(&client, client.room);
-            if (client.room->num_clients == 0) {
-                reset_room(client.room);
+        room_t *room = client.room;
+        if (room != NULL) {
+            if (!(room->in_game)){
+                bool was_king = false;
+                if (client.isking){
+                    was_king = true;
+                }
+                sprintf(buffer, "LEFT|%s\n", client.nickname);
+                broadcast(buffer, room);
+                reset_stats(&client);
+                remove_client_from_room(&client, client.room);
+                if (room->num_clients == 0) {
+                    reset_room(room);
+                } else {
+                    if (was_king){
+                        room->clients[0]->isking = true;
+                        send_to_client("ISKING", *(room->clients[0]));
+                    }
+                }
+            } else {
+                sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, client.nickname);
+                room->lost++;
+                broadcast(buffer, room);
+                reset_stats(&client);
+                remove_client_from_room(&client, room);
+                if (room->num_clients == 1) {
+                    sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, room->clients[0]->nickname);
+                    room->lost++;
+                    send_to_client(buffer, *(room->clients[0]));
+                    reset_stats(&client);
+                    remove_client_from_room(room->clients[0], room);
+                    reset_room(room);
+                }
             }
         }
         return 1;
     }
-
     return 0;
 }
 
@@ -333,6 +366,8 @@ int main(int argc, char** argv) {
         std::string room_name = "Pokoj" + std::to_string(i+1);
         strcpy(room->room_name, room_name.c_str());
         room->num_clients = 0;
+        room->place = 1;
+        room->lost = 0;
         rooms[num_rooms++] = room;
     }
 
