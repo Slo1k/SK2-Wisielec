@@ -68,6 +68,7 @@ void send_to_client(const char* msg, client_t client) {
 
 //Zresetowanie statystyk klienta
 void reset_stats(client_t* client){
+    client->room = NULL;
     client->points = 0;
     client->errors = 0;
     client->isking = false;
@@ -202,12 +203,14 @@ int handle_client(client_t &client) {
             client.ready = true;
             bool game_start = true;
             for (int i = 0; i < room->num_clients; i++) {
+                std::cout << room->clients[i]->ready << std::endl;
                 if (!room->clients[i]->ready) {
                     game_start = false;
                     break;
                 }
             }
             if (game_start) {
+                std::cout << "Game Start: " << game_start << std::endl;
                 strcpy(room->room_hangman, "KUKULKA");
                 char *tmp = strdup(room->room_hangman);
                 for (char *p = tmp; *p != '\0'; p++) {
@@ -239,8 +242,8 @@ int handle_client(client_t &client) {
                 if (strcmp(client.player_hangman, room->room_hangman) == 0) {
                     sprintf(buffer, "WON|%d|%s\n", room->place, client.nickname);
                     broadcast(buffer, room);
-                    reset_stats(&client);
                     remove_client_from_room(&client, room);
+                    reset_stats(&client);
                     room->place++;
                     won_lost = true;
                 }
@@ -250,8 +253,8 @@ int handle_client(client_t &client) {
                     sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, client.nickname);
                     room->lost++;
                     broadcast(buffer, room);
-                    reset_stats(&client);
                     remove_client_from_room(&client, room);
+                    reset_stats(&client);
                     won_lost = true;
                 }
             }
@@ -259,8 +262,8 @@ int handle_client(client_t &client) {
                 sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, room->clients[0]->nickname);
                 room->lost++;
                 send_to_client(buffer, *(room->clients[0]));
-                reset_stats(&client);
                 remove_client_from_room(room->clients[0], room);
+                reset_stats(&client);
                 reset_room(room);
             }
             if (!won_lost){
@@ -277,8 +280,8 @@ int handle_client(client_t &client) {
                     }
                     sprintf(buffer, "LEFT|%s\n", client.nickname);
                     broadcast(buffer, room);
-                    reset_stats(&client);
                     remove_client_from_room(&client, client.room);
+                    reset_stats(&client);
                     if (room->num_clients == 0) {
                         reset_room(room);
                     } else {
@@ -290,14 +293,14 @@ int handle_client(client_t &client) {
                     sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, client.nickname);
                     room->lost++;
                     broadcast(buffer, room);
-                    reset_stats(&client);
                     remove_client_from_room(&client, room);
+                    reset_stats(&client);
                     if (room->num_clients == 1) {
                         sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, room->clients[0]->nickname);
                         room->lost++;
                         send_to_client(buffer, *(room->clients[0]));
-                        reset_stats(&client);
                         remove_client_from_room(room->clients[0], room);
+                        reset_stats(&client);
                         reset_room(room);
                     }
                 }
