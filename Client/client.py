@@ -198,7 +198,6 @@ class HangmanScreen(QDialog):
             current_players[player_nick] = [players_count, 0, 0]
             self.hangmanScores[players_count].setText(f"{player_nick}: 0")
             self.hangmanScores[players_count].setVisible(True)
-            self.hangmanPictures[players_count].setPixmap(QtGui.QPixmap(f"images/hangman0.png"))
             self.hangmanPictures[players_count].setVisible(True)
         elif message.startswith("ATLEAST2PLAYERS"):
             msg = QMessageBox()
@@ -206,6 +205,7 @@ class HangmanScreen(QDialog):
             msg.setText("Do rozpoczęcia rozgrywki potrzeba minimum 2 graczy!")
             msg.exec_()
         elif message.startswith("LEFT"):
+            print(current_players)
             player = message.split("|")[1]
             player_ind, _, _ = current_players[player]
             if in_game:
@@ -251,7 +251,6 @@ class HangmanScreen(QDialog):
                 msg.setWindowTitle("Przegrałeś!")
                 msg.setText(f"Przegrałeś i zająłeś {place} miejsce!")
                 msg.exec_()
-                self.reset_player_stats()
                 self.leave()
             elif who == my_nick and won_lost == "WON":
                 self.hangmanResults[0].setText(f"Miejse {place}")
@@ -261,7 +260,6 @@ class HangmanScreen(QDialog):
                 msg.setWindowTitle("Wygraleś!")
                 msg.setText(f"Wygrałeś i zająłeś {place} miejsce!")
                 msg.exec_()
-                self.reset_player_stats()
                 self.leave()
             elif won_lost == "LOST":
                 player_ind, _, _ = current_players[who]
@@ -280,7 +278,7 @@ class HangmanScreen(QDialog):
             self.hangmanButtonStart.setVisible(True)
 
         self.display_start()
-        self.update()
+        self.repaint()
 
     def setup_current_players(self):
         for key, value in current_players.items():
@@ -318,23 +316,9 @@ class HangmanScreen(QDialog):
         if is_king:
             self.hangmanButtonStart.setVisible(True)
 
+
     def start_game(self):
         send_message("START")
-
-    def reset_player_stats(self):
-        global hangman_password
-        global hidden_hangman_password
-        global players_count
-        global in_game
-        global in_room
-        global is_king
-
-        players_count = 0
-        hangman_password = ""
-        hidden_hangman_password = []
-        in_game = False
-        in_room = False
-        is_king = False
 
     def leave(self):
         global in_room
