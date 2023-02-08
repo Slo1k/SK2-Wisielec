@@ -318,10 +318,10 @@ int handle_client(client_t &client) {
                 if (client.isking){
                     was_king = true;
                 }
+                remove_client_from_room(&client, client.room);
+                reset_stats(&client);
                 sprintf(buffer, "LEFT|%s\n", client.nickname);
                 broadcast(buffer, room);
-                reset_stats(&client);
-                remove_client_from_room(&client, client.room);
                 if (room->num_clients == 0) {
                     reset_room(room);
                 } else {
