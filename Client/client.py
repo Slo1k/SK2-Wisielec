@@ -86,6 +86,7 @@ class RoomsScreen(QDialog):
         global is_king
         global in_room
         global players_count
+        global current_players
         chosen_room = self.roomComboBox.currentText().split("|")[0]
         send_message("JOIN " + chosen_room)
         status = client_socket.recv(1024).decode("utf-8").strip().split()
@@ -183,7 +184,6 @@ class HangmanScreen(QDialog):
         ]
         self.disable_letter_buttons()
         self.setup_current_players()
-
         self.letterButtons.buttonClicked.connect(self.guess_letter)
         self.hangmanButtonStart.clicked.connect(self.start_game)
         self.hangmanButtonAccept.clicked.connect(self.accept_game)
@@ -198,14 +198,19 @@ class HangmanScreen(QDialog):
             current_players[player_nick] = [players_count, 0, 0]
             self.hangmanScores[players_count].setText(f"{player_nick}: 0")
             self.hangmanScores[players_count].setVisible(True)
+            self.hangmanPictures[players_count].setPixmap(QtGui.QPixmap(f"images/hangman0.png"))
             self.hangmanPictures[players_count].setVisible(True)
+        elif message.startswith("CURRENTPLAYERS"):
+            for player in message.split("|")[1:-1]:
+                players_count += 1
+                current_players[player] = [players_count, 0, 0]
+            self.setup_current_players()
         elif message.startswith("ATLEAST2PLAYERS"):
             msg = QMessageBox()
             msg.setWindowTitle("Błąd!")
             msg.setText("Do rozpoczęcia rozgrywki potrzeba minimum 2 graczy!")
             msg.exec_()
         elif message.startswith("LEFT"):
-            print(current_players)
             player = message.split("|")[1]
             player_ind, _, _ = current_players[player]
             if in_game:
@@ -251,6 +256,7 @@ class HangmanScreen(QDialog):
                 msg.setWindowTitle("Przegrałeś!")
                 msg.setText(f"Przegrałeś i zająłeś {place} miejsce!")
                 msg.exec_()
+                self.reset_player_stats()
                 self.leave()
             elif who == my_nick and won_lost == "WON":
                 self.hangmanResults[0].setText(f"Miejse {place}")
@@ -260,6 +266,7 @@ class HangmanScreen(QDialog):
                 msg.setWindowTitle("Wygraleś!")
                 msg.setText(f"Wygrałeś i zająłeś {place} miejsce!")
                 msg.exec_()
+                self.reset_player_stats()
                 self.leave()
             elif won_lost == "LOST":
                 player_ind, _, _ = current_players[who]
@@ -278,10 +285,13 @@ class HangmanScreen(QDialog):
             self.hangmanButtonStart.setVisible(True)
 
         self.display_start()
-        self.repaint()
+        self.update()
 
     def setup_current_players(self):
+        global current_players
+        print("USTAWIENIA!")
         for key, value in current_players.items():
+            print(f"KEY: {key} VALUE: {value}")
             self.hangmanScores[value[0]].setText(f"{key}: 0")
             self.hangmanScores[value[0]].setVisible(True)
             self.hangmanPictures[value[0]].setVisible(True)
@@ -316,9 +326,23 @@ class HangmanScreen(QDialog):
         if is_king:
             self.hangmanButtonStart.setVisible(True)
 
-
     def start_game(self):
         send_message("START")
+
+    def reset_player_stats(self):
+        global hangman_password
+        global hidden_hangman_password
+        global players_count
+        global in_game
+        global in_room
+        global is_king
+
+        players_count = 0
+        hangman_password = ""
+        hidden_hangman_password = []
+        in_game = False
+        in_room = False
+        is_king = False
 
     def leave(self):
         global in_room
