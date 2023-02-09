@@ -231,10 +231,14 @@ class HangmanScreen(QDialog):
                         if hangman_password[i] == sent_letter:
                             hidden_hangman_password[i] = sent_letter
                     self.display_hangman_hidden()
+                    self.hangmanLabelMyScore.setVisible(False)
                     self.hangmanLabelMyScore.setText(f"Twój wynik:\n{points}")
+                    self.hangmanLabelMyScore.setVisible(True)
                     current_players[who] = [points, errors]
                 else:
+                    self.hangmanLabelMyHangman.setVisible(False)
                     self.hangmanLabelMyHangman.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
+                    self.hangmanLabelMyHangman.setVisible(True)
             else:
                 player_ind, player_points, player_errors = current_players[who]
                 self.hangmanScores[player_ind].setText(f"{who}: {points}")
@@ -319,6 +323,7 @@ class HangmanScreen(QDialog):
         self.hangmanButtonAccept.setVisible(True)
 
     def display_hangman_hidden(self):
+        self.hangmanLabelPassword.setVisible(False)
         self.hangmanLabelPassword.setText(" ".join(hidden_hangman_password))
         self.hangmanLabelPassword.setVisible(True)
 
