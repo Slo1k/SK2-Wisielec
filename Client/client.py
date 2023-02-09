@@ -35,7 +35,6 @@ class ServerThread(QThread):
             message = client_socket.recv(1024).decode("utf-8").strip().split("\n")
             if len(message) >= 1:
                 for mess in message:
-                    print("FROM SERVER:", mess.strip())
                     self.new_message.emit(mess.strip())
 
 
@@ -65,6 +64,10 @@ class NickScreen(QDialog):
                             rooms = RoomsScreen()
                             widget.addWidget(rooms)
                             widget.setCurrentIndex(widget.currentIndex() + 1)
+                    else:
+                        print("Rozłączono z serwerem!")
+                        client_socket.close()
+                        sys.exit()
                 except:
                     print("Błąd przy otrzymywaniu odpowiedzi od serwera")
                     client_socket.close()
@@ -195,6 +198,7 @@ class HangmanScreen(QDialog):
         global hangman_password
         global hidden_hangman_password
         global players_count
+        global is_king
         if message.startswith("JOINED"):
             players_count += 1
             player_nick = message.split("|")[1]
@@ -224,21 +228,18 @@ class HangmanScreen(QDialog):
             _, who, points, errors = message.split("|")
             points = int(points)
             errors = int(errors)
-            current_points = current_players[who][1]
+            player_ind, current_points, current_errors = current_players[who]
             if my_nick == who:
-                if current_points < points:
+                if current_points != points:
                     for i in range(len(hangman_password)):
                         if hangman_password[i] == sent_letter:
                             hidden_hangman_password[i] = sent_letter
                     self.display_hangman_hidden()
-                    self.hangmanLabelMyScore.setVisible(False)
                     self.hangmanLabelMyScore.setText(f"Twój wynik:\n{points}")
-                    self.hangmanLabelMyScore.setVisible(True)
-                    current_players[who] = [points, errors]
-                else:
-                    self.hangmanLabelMyHangman.setVisible(False)
+                    current_players[who] = [player_ind, points, errors]
+                elif current_errors != errors:
                     self.hangmanLabelMyHangman.setPixmap(QtGui.QPixmap(f"images/hangman{errors}.png"))
-                    self.hangmanLabelMyHangman.setVisible(True)
+                    current_players[who] = [player_ind, points, errors]
             else:
                 player_ind, player_points, player_errors = current_players[who]
                 self.hangmanScores[player_ind].setText(f"{who}: {points}")
@@ -289,17 +290,14 @@ class HangmanScreen(QDialog):
                 self.hangmanResults[player_ind].setVisible(True)
                 del current_players[who]
         elif message.startswith("ISKING"):
-            self.hangmanButtonStart.setVisible(True)
+            is_king = True
+            self.display_start()
 
-        self.display_start()
-        self.hide()
-        self.show()
+        self.update()
 
     def setup_current_players(self):
         global current_players
-        print("USTAWIENIA!")
         for key, value in current_players.items():
-            print(f"KEY: {key} VALUE: {value}")
             self.hangmanScores[value[0]].setText(f"{key}: 0")
             self.hangmanScores[value[0]].setVisible(True)
             self.hangmanPictures[value[0]].setVisible(True)
@@ -361,6 +359,7 @@ class HangmanScreen(QDialog):
         in_room = False
         send_message("LEAVE")
         self.server_thread.terminate()
+        self.hide()
         widget.removeWidget(self)
         widget.setCurrentIndex(widget.currentIndex())
 
@@ -374,7 +373,7 @@ class HangmanScreen(QDialog):
 
     def guess_letter(self, btn):
         global sent_letter
-        sent_letter = btn.text()
+        sent_letter = btn.text().strip()
         send_message("GUESS " + btn.text())
         btn.setDisabled(True)
 
