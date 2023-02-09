@@ -51,21 +51,24 @@ class NickScreen(QDialog):
         if not my_nick:
             self.nickErrorLabel.setText(f"Nick nie może być pusty!")
         else:
-            message = "SETNICK " + my_nick
-            send_message(message)
-            try:
-                status = client_socket.recv(1024).decode("utf-8").strip()
-                if len(status) > 0:
-                    if status == "NICKTAKEN":
-                        self.nickErrorLabel.setText(f"Nick: [{my_nick}] jest już zajęty!")
-                    else:
-                        rooms = RoomsScreen()
-                        widget.addWidget(rooms)
-                        widget.setCurrentIndex(widget.currentIndex() + 1)
-            except:
-                print("Błąd przy otrzymywaniu odpowiedzi od serwera")
-                client_socket.close()
-                sys.exit()
+            if len(my_nick) > 15:
+                self.nickErrorLabel.setText(f"Nick nie może być dłuższy niż 15 znaków!")
+            else:
+                message = "SETNICK " + my_nick.strip()
+                send_message(message)
+                try:
+                    status = client_socket.recv(1024).decode("utf-8").strip()
+                    if len(status) > 0:
+                        if status == "NICKTAKEN":
+                            self.nickErrorLabel.setText(f"Nick: [{my_nick}] jest już zajęty!")
+                        else:
+                            rooms = RoomsScreen()
+                            widget.addWidget(rooms)
+                            widget.setCurrentIndex(widget.currentIndex() + 1)
+                except:
+                    print("Błąd przy otrzymywaniu odpowiedzi od serwera")
+                    client_socket.close()
+                    sys.exit()
 
 
 class RoomsScreen(QDialog):
@@ -286,6 +289,7 @@ class HangmanScreen(QDialog):
 
         self.display_start()
         self.update()
+        self.repaint()
 
     def setup_current_players(self):
         global current_players
