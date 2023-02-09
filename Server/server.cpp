@@ -228,7 +228,6 @@ int handle_client(client_t &client) {
             client.ready = true;
             bool game_start = true;
             for (int i = 0; i < room->num_clients; i++) {
-                std::cout << room->clients[i]->ready << std::endl;
                 if (!room->clients[i]->ready) {
                     game_start = false;
                     break;
@@ -329,9 +328,7 @@ int handle_client(client_t &client) {
                         sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, room->clients[0]->nickname);
                         room->lost++;
                         send_to_client(buffer, *(room->clients[0]));
-                        std::cout << "1 Before: " << room->clients[0]->ready << std::endl;
                         reset_stats(room->clients[0]);
-                        std::cout << "1 After: " << room->clients[0]->ready << std::endl;
                         remove_client_from_room(room->clients[0], room);
                         reset_room(room);
                     }
@@ -370,9 +367,7 @@ int handle_client(client_t &client) {
                     sprintf(buffer, "LOST|%d|%s\n", room->clients_at_start - room->lost, room->clients[0]->nickname);
                     room->lost++;
                     send_to_client(buffer, *(room->clients[0]));
-                    std::cout << "2 Before: " << room->clients[0]->ready << std::endl;
                     reset_stats(room->clients[0]);
-                    std::cout << "2 After: " << room->clients[0]->ready << std::endl;
                     remove_client_from_room(room->clients[0], room);
                     reset_room(room);
                 }
