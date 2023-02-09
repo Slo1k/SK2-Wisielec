@@ -292,8 +292,8 @@ class HangmanScreen(QDialog):
             self.hangmanButtonStart.setVisible(True)
 
         self.display_start()
-        self.update()
-        self.repaint()
+        self.hide()
+        self.show()
 
     def setup_current_players(self):
         global current_players
