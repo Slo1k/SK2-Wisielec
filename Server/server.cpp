@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstring>
 #include <unordered_map>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -10,6 +9,10 @@
 #include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <csignal>
+#include <fstream>
+#include <ctime>
+#include <cstdlib>
+#include <vector>
 
 #define MAX_CLIENTS 9
 #define MAX_ROOMS 4
@@ -46,6 +49,7 @@ std::unordered_map<int, client_t> clients;
 int num_clients = 0;
 room_t* rooms[MAX_CLIENTS];
 int num_rooms = 0;
+std::string file_name = "words.txt";
 
 void error(const char* msg) {
     perror(msg);
@@ -57,12 +61,33 @@ void sig_handler(int signal){
     close(listen_fd);
 }
 
+
+std::string get_random_word(const std::string& file_name){
+    std::ifstream file(file_name);
+    if (!file.is_open()){
+        std::cerr << "Blad przy otwieraniu pliku: " << file_name << std::endl;
+        return "";
+    }
+    std::string line;
+    std::vector<std::string> lines;
+    while (std::getline(file, line)){
+        lines.push_back(line);
+    }
+    file.close();
+    if (lines.empty()){
+        std::cerr << "Plik jest pusty!" << std::endl;
+        return "";
+    }
+    int random_index = rand() % lines.size();
+    return lines[random_index];
+}
+
 //Wyslanie wiadomosci do klienta
 void send_to_client(const char* msg, client_t client) {
     printf("%d|SENDING: %s", client.sockfd, msg);
     int n = write(client.sockfd, msg, strlen(msg));
     if (n < 0) {
-        error("ERROR writing to socket");
+        error("Blad przy pisaniu do socketa");
     }
 }
 
@@ -210,18 +235,23 @@ int handle_client(client_t &client) {
                 }
             }
             if (game_start) {
-                std::cout << "Game Start: " << game_start << std::endl;
-                strcpy(room->room_hangman, "KUKULKA");
-                char *tmp = strdup(room->room_hangman);
-                for (char *p = tmp; *p != '\0'; p++) {
-                    *p = '_';
-                }
-                std::string hangman_message = "HANGMANSTART|";
-                hangman_message += room->room_hangman;
-                hangman_message += "\n";
-                for (int i = 0; i < room->num_clients; i++) {
-                    strcpy(room->clients[i]->player_hangman, tmp);
-                    send_to_client(hangman_message.c_str(), *(room->clients[i]));
+                std::string random_word = get_random_word(file_name);
+                if (random_word.empty()) {
+                    std::cerr << "Brak hasel do wylosowania!";
+                    return 1;
+                } else {
+                    strcpy(room->room_hangman, random_word.c_str());
+                    char *tmp = strdup(room->room_hangman);
+                    for (char *p = tmp; *p != '\0'; p++) {
+                        *p = '_';
+                    }
+                    std::string hangman_message = "HANGMANSTART|";
+                    hangman_message += room->room_hangman;
+                    hangman_message += "\n";
+                    for (int i = 0; i < room->num_clients; i++) {
+                        strcpy(room->clients[i]->player_hangman, tmp);
+                        send_to_client(hangman_message.c_str(), *(room->clients[i]));
+                    }
                 }
             }
         } else if (strcmp(token, "GUESS") == 0) {
