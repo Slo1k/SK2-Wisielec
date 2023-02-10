@@ -50,8 +50,8 @@ class NickScreen(QDialog):
         if not my_nick:
             self.nickErrorLabel.setText(f"Nick nie może być pusty!")
         else:
-            if len(my_nick) > 15:
-                self.nickErrorLabel.setText(f"Nick nie może być dłuższy niż 15 znaków!")
+            if len(my_nick) > 10:
+                self.nickErrorLabel.setText(f"Nick nie może być dłuższy niż 10 znaków!")
             else:
                 message = "SETNICK " + my_nick.strip()
                 send_message(message)
