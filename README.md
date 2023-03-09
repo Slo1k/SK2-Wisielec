@@ -12,5 +12,5 @@ PyQt w wersji 5.
 - Dla klienta python3 client [ADRES] [PORT]
 
 ### Autorzy:
-Mikołaj Krakowiak 148076
-Adam Kopiec 148198
+- Mikołaj Krakowiak
+- Adam Kopiec
